@@ -10,6 +10,7 @@ Git 사용 및 명령어 정리
 git init
 git add 파일명 
 git commit -m "넣을 메세지"
+git remote add origin [github repository 주소]
 git push -u origin master
 ```
 
@@ -17,6 +18,7 @@ git push -u origin master
 
 ``` dslakfjalsdkjfasdfdsa
 git add [파일명]
+git add .(위의 것 대신)
 git commit -m "메세지"
 git push -u origin master
 ```
