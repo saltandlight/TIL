@@ -3,3 +3,6 @@
 - Java, Hadoop, Linux, R, Spring MVC 등의 기술을 경험했습니다.
 - 처음에 깃 파일 정리를 폴더마다 따로따로 하여 폴더가 흩어져 있는 상황입니다.
 - 일단은 Django 파일은 이 곳에 있습니다. 
+## 학습한 내용
+- Java
+- Django
