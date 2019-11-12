@@ -1,0 +1,32 @@
+package chat;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Servlet implementation class ChatServlet
+ */
+@WebServlet(description = "/chat", urlPatterns = { "/ChatServlet" })
+public class ChatServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    Client client; 
+    
+    public ChatServlet() {
+    	try {
+			client = new Client("70.12.60.101", 8888);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String msg = request.getParameter("msg");
+		client.sendMsg(msg);
+	}
+
+}
