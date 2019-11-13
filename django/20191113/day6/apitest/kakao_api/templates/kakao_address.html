@@ -13,9 +13,8 @@
         <input type="text">
         <input type="submit" value="키워드 검색"><br>
         {% for position in result %}
-            <label>{{position.address_name}}
-                <input type="radio" value="x={{position.x}}&y={{position.y}}"> 
-            </label>
+            <label>{{position.address_name}}<input type="radio" name="position" value="x={{position.x}}&y={{position.y}}"> 
+            </label><br>
         {% endfor %}
     </form>
 </body>
