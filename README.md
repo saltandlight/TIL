@@ -5,4 +5,5 @@
 - 일단은 Java, Django 파일은 이 곳에 있습니다. 
 ## 학습한 내용
 - Java
+- Java, Oracle 
 - Django
