@@ -33,4 +33,18 @@ def find_address(request):
     return render(request,'kakao_address.html', context)
 
 def keyword_result(request):
-    return ''
+    # 키워드를 입력하는 곳에서 입력한 키워드와 
+    # position(위, 경도) 좌표를 추출해서 
+    # kakao api의 키워드 검색 api에 요청을 보낸다. 
+    keyword = request.GET['keyword']
+    position = request.GET['position']
+    gps_x = ''
+    gps_y = ''
+
+    context={
+        'keyword':keyword,
+        'position':position,
+        'x':gps_x,
+        'y':gps_y
+    }
+    return render(request, 'keyword_result.html', context)
