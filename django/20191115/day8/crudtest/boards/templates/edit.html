@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{{board.title}} 
+<form action="/boards/{{board.id}}/update">
+  <div class="form-group">
+    <label for="title" >제목</label>
+    <input type="text" class="form-control" id="title" placeholder="제목을 입력하세요" name="title" value="{{board.title}}">
+  </div>
+
+  <div class="form-group">
+    <label for="contents">내용</label>
+    <textarea class="form-control" id="contents" rows="3" name="contents">{{board.contents}}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="creator">작성자</label>
+    <textarea class="form-control" id="creator" rows="3" name="creator" readonly>{{board.creator}}</textarea>
+  </div>
+
+  <div class="form-group text-center">
+    <input type="submit" class="btn btn-success" value="작성하기" >
+  </div>
+</form>
+
+{% endblock %}
