@@ -66,8 +66,9 @@ def update(request, id):
 
 def delete(request, id):
     # Article Model에 있는 특정 Article을 가져와야 함 
-    article = Article.objects.get(id=id)
-    article.delete()
-    return redirect('articles:index')
+    if request.method == 'POST':
+        article = Article.objects.get(id=id)
+        article.delete()
+        return redirect('articles:index')
 
 

@@ -8,7 +8,7 @@
     </div>
 
     <a href="{% url 'articles:edit' article.id %}" class="btn btn-primary">수정하기</a>
-    <a method="post" href="{% url 'articles:delete' article.id %}" class="btn btn-info">삭제하기</a>
+    <a href="{% url 'articles:delete' article.id %}" class="btn btn-info">삭제하기</a>
 </div>
 
 {% endblock %}
