@@ -38,7 +38,7 @@
     {% for article in articles %}
     <div class="row mt-4">
         <div class="card col-12">
-            <img src="{% static '/article/images/blank.png' %}" alt="blank.png" class="card-img-top">
+            <img src="{{article.image.url}}" alt="{{aritcle.image}}" class="card-img-top">
             <div class="card-body">
                 <div class="article" style="min-height: 9rem;">
                     <p class="card-text">{{article.contents}}</p>

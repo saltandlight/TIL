@@ -1,5 +1,6 @@
 from django.db import models
-
+# from imagekit.models import ProcessedImageField
+# from imagekit.processors import ResizeToFill, ResizeToFit
 # Create your models here.
 
 class Article(models.Model):
@@ -7,16 +8,20 @@ class Article(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     image = models.ImageField(blank=True)
-
-    # 자식을 모르니까 데려옴 
+    #processed image field
+    # image_resized = ProcessedImageField(
+    #     # source='image',
+    #     upload_to = 'articles/images',
+    #     processors = [ResizeToFit(200, 300)],
+    #     format='JPEG',
+    #     options={'quality':90}
+    # )
     def comments(self):
-        return Comment.objects.filter(article_id = self.id)
+        return Comment.objects.filter(article_id=self.id)
 
 class Comment(models.Model):
     contents = models.TextField()
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # 꼭 models.CASCADE 안 해도 됨 
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
 
