@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block stylesheet %}
+<style>
+.container {
+    padding-right: 10em !important;
+    padding-left: 10em !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <form action="{% url 'articles' %}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+            <div class="card-body">
+                <textarea name="contents" class="form-control" rows="5"></textarea>
+                <div class="input-group mt-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                    </div>
+                    <div class="custom-file">
+                        <input multiple name="image" type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
+                        <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-right">
+                <input type="submit" class="btn btn-success" value="작성하기">
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    {% for article in articles %}
+    <div class="row mt-4">
+        <div class="card col-12">
+            {% if article.article_images %}
+            <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    {% for image in article.article_images %}
+                    <div class="carousel-item {%if image.image_thumbnail.url == article.article_images.first.image_thumbnail.url%}active{% endif %}">
+                        <img src="{{image.image_thumbnail.url}}" class="d-block w-100" alt="...">
+                    </div>
+                    {% endfor %}
+                </div>
+                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <div class="article" style="min-height: 9rem;">
+                    <p class="card-text">{{article.contents}}</p>
+                </div>
+                <div class="text-center">
+                    <a href="{% url 'edit' article.id %}" class="btn btn-warning text-white"><i class="fas fa-edit"></i></a>
+                    <a href="{% url 'delete' article.id %}" class="btn btn-danger text-white"><i class="fas fa-trash-alt"></i></a>
+                </div>
+            </div>
+            <ul class="list-group list-group-flush">
+                    <form action="{% url 'comments' %}" method="POST">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+                        <input type="hidden" name="article_id" value="{{article.id}}">
+                        <div class="row">                            
+                            
+                        </div>
+                    </form>
+                    <form class="mb-5 mt-5" id="boardForm">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}" id="csrfToken">
+                            <input type="text" class="form-control" id="boardInput">
+                            <button type="submit" class="btn btn-primary" id="submitComment">확인</button>
+                    </form>
+              
+
+
+                <div class="commentList">
+                    <ul class="list-group">
+                            {% for comment in article.comments %}
+                            <li class="list-group-item">
+                                <i class="fas fa-comment-dots"></i> 
+                                {{comment.contents}}
+                                <span class="float-right">
+                                        <button type="button" class="btn btn-danger deleteComment" data-id="{{board.id}}" value="1">삭제</button>
+                                        <button type="button" class="btn btn-warning editComment" data-id="{{board.id}}">수정</button>
+                                    </span>
+                                <!-- <span class="float-right">
+                                    <a href="{% url 'edit_comment' comment.id %}" class="btn btn-warning text-white"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'delete_comment' comment.id %}" class="btn btn-danger text-white"><i class="fas fa-trash-alt"></i></a>
+                                </span> -->
+                            </li>
+                            {% endfor %}
+                    </ul>
+                </div>
+              
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    //내가 짜야 할 js code
+    $(function(){
+        $(document).on('click', '.editComment', function(){
+                var id = $(this).data('id');
+                console.log(id);
+                var contents = $('#comment-'+id+' .commentItem').text();
+               $('#comment').val(contents);
+               // $('#submitComment').data('method', 'edit');
+                $('#submitComment').data('id', id);
+                console.log($('#submitComment').data());
+                // $('#submitComment').data('method', 'edit');
+                //한 개 있을 때는 이름으로 값을 뽑아오는 것
+                //두 개 있을 떄는 data-method에 edit이 들어감
+        })
+
+        $('#boardForm').on('submit', function(e){
+                //e는 event의 약자임
+                //기존 이벤트를 삭제함
+                event.preventDefault()
+                console.log("Hello")
+                //실제 db등록이 될 수 있게끔 ajax 요청을 만들어줌
+                var board = $('#boardInput').val();
+                $('#boardInput').val('');
+                if($('#submitComment').data('method')=="edit"){
+                    console.log("edit");
+                    var id = $('#submitComment').data('id');
+                    $.ajax({
+                    url:'{% url "edit_boards" %}',
+                    method: 'POST',
+                    data: {
+                        //value는 form에 입력해놓은 내용일 것
+                        board_id: id,
+                        contents: board,
+                        csrfmiddlewaretoken: '{{csrf_token}}',
+                    },
+                    success:function(data){
+                        $('#board-' + id + ' .boardItem').text(board);
+                            // 뭘 바꿔야함? -> 내용을 바꿔야함
+                            // 확인 버튼에 달려있는 속성(data-method)을 삭제해야함
+                        $('#submitComment').removeData('method');
+                        $('#submitComment').removeData('id');
+                    },
+                    error:function(data){
+                        alert("수정 실패");
+                    }
+                })
+                }else{
+                    $.ajax({
+                    url:'{% url "submit_boards" %}',
+                    method: 'POST',
+                    data: {
+                        //value는 form에 입력해놓은 내용일 것
+                        board: board,
+                        csrfmiddlewaretoken: '{{csrf_token}}'
+                    },
+                    success:function(data){
+                        alert("성공!");
+                        $('.list-group').prepend(data);
+                    },
+                    error:function(data){
+                        alert("실패!");
+                    }
+                })
+                }
+               
+            })
+
+
+        alert("done");
+    })
+</script>
+{% endblock %}
