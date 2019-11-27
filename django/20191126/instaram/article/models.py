@@ -54,3 +54,4 @@ class Comment(models.Model):
 class Board(models.Model):
     contents = models.CharField(max_length=16)
     created_at =models.DateTimeField(auto_now_add=True)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)

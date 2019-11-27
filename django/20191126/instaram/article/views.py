@@ -18,11 +18,15 @@ def jq_test(request):
 def submit_boards(request):
     if request.method == "POST":
         contents = request.POST["board"]
-        board = Board.objects.create(contents=contents)
+        article_id = request.POST["article_id"]
+        board= Board()
+        board.contents=contents
+        board.article_id=article_id
+        board.save()
         context = {
             'board':board
         }
-        return render(request, 'empty.html', context)
+        return redirect('articles')
 
 def delete_boards(request):
     # json으로 리턴해주기 
@@ -71,7 +75,7 @@ def index(request):
         boards = Board.objects.all().order_by("created_at").reverse()
         context = {
             'articles': articles,
-            'boards':boards
+            'boards': boards
         }
         return render(request, 'index.html', context)
 
@@ -96,17 +100,29 @@ def comments(request):
     if request.method == "POST":
         contents = request.POST["contents"]
         article_id = request.POST["article_id"]
+        if request.POST["form_method"]=="create":
+            comment = Comment()
+        elif request.POST["form_method"]=="edit":
+            comment_id = request.POST["comment_id"]
+            comment = Comment.objects.get(id=comment_id)
 
-        comment = Comment()
         comment.contents = contents
         comment.article_id = article_id
         comment.save()
-        return redirect('articles')
+        context = {
+            'method':request.POST["form_method"],
+            'comment': comment.contents,
+            'comment_id': comment.id,
+            'article_id': comment.article_id,
+        }
+        return HttpResponse(json.dumps(context), content_type='application/json')
 
-def delete_comment(request, comment_id):
-    comment = Comment.objects.get(id=comment_id)
-    comment.delete()
-    return redirect('articles')
+def delete_comment(request):
+    if request.method == "POST":
+        comment_id = request.POST["comment_id"]
+        comment = Comment.objects.get(id=comment_id)
+        comment.delete()
+        return HttpResponse('',status=204)
 
 def edit_comment(request, comment_id):
     comment = Comment.objects.get(id=comment_id)

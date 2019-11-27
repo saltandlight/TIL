@@ -66,36 +66,36 @@
                     <a href="{% url 'delete' article.id %}" class="btn btn-danger text-white"><i class="fas fa-trash-alt"></i></a>
                 </div>
             </div>
-            <ul class="list-group list-group-flush">
-                    <form action="{% url 'comments' %}" method="POST">
-                        <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
-                        <input type="hidden" name="article_id" value="{{article.id}}">
-                        <div class="row">                            
-                            
-                        </div>
-                    </form>
-                    <form class="mb-5 mt-5" id="boardForm">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}" id="csrfToken">
-                            <input type="text" class="form-control" id="boardInput">
-                            <button type="submit" class="btn btn-primary" id="submitComment">확인</button>
-                    </form>
-              
+            <ul class="list-group list-group-flush" id="comment-list-group-{{article.id}}">
+                    
+                    <li class="list-group-item" >
+                        <form action="{% url 'comments' %}" method="POST" class="commentForm" id="commentForm-{{article.id}}">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+                            <input type="hidden" class="articleId" name="article_id" value="{{article.id}}">
+                            <input type="hidden" class="formMethod" name="form_method" value="create">
+                            <input type="hidden" class="commentId" name="comment_id">
+                            <div class="row">
+                                <div class="col-9">
+                                    <input type="text" class="form-control commentInput" name="contents" class="commentInput">
+                                </div>
+                                <div class="col-3 text-center">
+                                    <input type="submit" class="btn btn-primary" value="쓰기">
+                                </div>
+                            </div>
+                        </form>
+                    </li>
 
 
                 <div class="commentList">
                     <ul class="list-group">
                             {% for comment in article.comments %}
-                            <li class="list-group-item">
+                            <li class="list-group-item" id="comment-{{comment.id}}">
                                 <i class="fas fa-comment-dots"></i> 
-                                {{comment.contents}}
+                                <span class="contents">{{comment.contents}}</span>
                                 <span class="float-right">
-                                        <button type="button" class="btn btn-danger deleteComment" data-id="{{board.id}}" value="1">삭제</button>
-                                        <button type="button" class="btn btn-warning editComment" data-id="{{board.id}}">수정</button>
-                                    </span>
-                                <!-- <span class="float-right">
-                                    <a href="{% url 'edit_comment' comment.id %}" class="btn btn-warning text-white"><i class="fas fa-edit"></i></a>
-                                    <a href="{% url 'delete_comment' comment.id %}" class="btn btn-danger text-white"><i class="fas fa-trash-alt"></i></a>
-                                </span> -->
+                                    <button data-contents="{{comment.contents}}" data-article-id="{{article.id}}" data-id="{{comment.id}}" class="btn btn-warning text-white editComment"><i class="fas fa-edit"></i></a>
+                                    <button data-id="{{comment.id}}" class="btn btn-danger text-white deleteComment"><i class="fas fa-trash-alt"></i></a>
+                                </span> 
                             </li>
                             {% endfor %}
                     </ul>
@@ -110,72 +110,126 @@
 
 {% block script %}
 <script>
-    //내가 짜야 할 js code
+ 
+
     $(function(){
-        $(document).on('click', '.editComment', function(){
-                var id = $(this).data('id');
-                console.log(id);
-                var contents = $('#comment-'+id+' .commentItem').text();
-               $('#comment').val(contents);
-               // $('#submitComment').data('method', 'edit');
-                $('#submitComment').data('id', id);
-                console.log($('#submitComment').data());
-                // $('#submitComment').data('method', 'edit');
-                //한 개 있을 때는 이름으로 값을 뽑아오는 것
-                //두 개 있을 떄는 data-method에 edit이 들어감
+    // 내가 짜야 할 js code
+    // create comment
+    // form으로부터 내용을 받아서 코멘트를 작성한다.(DB에도 반영함)
+    // article 별로 있는 form으로부터 
+    
+    // submit이라는 이벤트에
+        $('.commentForm').on('submit', function(e) {
+            e.preventDefault();
+            console.log("done");
+            // 해당 form에 있는 input 중에서 텍스트를 입력한 인풋으로부터 
+            //$(this).find('input'); //현재 있는 element의 자식 중에서 이 셀렉터가 ㅇㅆ는지 찾는 것
+            // var contents= $(this).find('input.commentInput').val();
+            
+            // 입력을 받아서 creqte comment 역할을 하는 url로 요청을 보낸다.
+
+            //어떤 article에 대한 댓글인지 알아야 함 
+            // var id = $(this).find('input.articleId').val();
+            // var method = $(this).find('input.formMethod').val();
+
+            console.log($(this).serialize());
+            var data = $(this).serialize();
+            $(this).find('input.commentInput').val('');
+            $('#commentForm-'+data.article_id+' .formMethod').val("create");
+            $.ajax({
+                url:'{% url "comments" %}',
+                method:'POST',
+                data:data,
+                success:function(data){
+                    if(data.method=="edit"){
+                        $('#commentForm-'+data.article_id+' .formMethod').val("create");
+                        $('#comment-'+data.comment_id+' .contents').text(data.comment);
+                        $('#comment-'+data.comment_id+' .editComment').data('contents', data.content);
+                    }else{
+                        console.log("성공!");
+                        console.log(data);
+                        var comment = `
+                        <li class="list-group-item" id="comment-${data.comment_id}">
+                            <i class="fas fa-comment-dots"></i> 
+                            <span class="contents">${data.comment}</span>
+                            <span class="float-right">
+                               <button data-contents="${data.comment}" data-article-id="${data.article_id}" data-id="${data.comment_id}" class="btn btn-warning text-white editComment"><i class="fas fa-edit"></i></a>
+                               <button data-id="${data.comment_id}" class="btn btn-danger text-white deleteComment" id="comment-${data.comment_id}"><i class="fas fa-trash-alt"></i></a>
+                            </span> 
+                        </li>
+                        `
+                    
+                        $('#comment-list-group-'+data.article_id).append(comment);
+                    }
+
+
+                    
+                    
+                },
+                error:function(data){
+                    console.log("실패!");
+                }
+            })
         })
 
-        $('#boardForm').on('submit', function(e){
-                //e는 event의 약자임
-                //기존 이벤트를 삭제함
-                event.preventDefault()
-                console.log("Hello")
-                //실제 db등록이 될 수 있게끔 ajax 요청을 만들어줌
-                var board = $('#boardInput').val();
-                $('#boardInput').val('');
-                if($('#submitComment').data('method')=="edit"){
-                    console.log("edit");
-                    var id = $('#submitComment').data('id');
-                    $.ajax({
-                    url:'{% url "edit_boards" %}',
-                    method: 'POST',
-                    data: {
-                        //value는 form에 입력해놓은 내용일 것
-                        board_id: id,
-                        contents: board,
-                        csrfmiddlewaretoken: '{{csrf_token}}',
-                    },
-                    success:function(data){
-                        $('#board-' + id + ' .boardItem').text(board);
-                            // 뭘 바꿔야함? -> 내용을 바꿔야함
-                            // 확인 버튼에 달려있는 속성(data-method)을 삭제해야함
-                        $('#submitComment').removeData('method');
-                        $('#submitComment').removeData('id');
-                    },
-                    error:function(data){
-                        alert("수정 실패");
-                    }
-                })
-                }else{
-                    $.ajax({
-                    url:'{% url "submit_boards" %}',
-                    method: 'POST',
-                    data: {
-                        //value는 form에 입력해놓은 내용일 것
-                        board: board,
-                        csrfmiddlewaretoken: '{{csrf_token}}'
-                    },
-                    success:function(data){
-                        alert("성공!");
-                        $('.list-group').prepend(data);
-                    },
-                    error:function(data){
-                        alert("실패!");
-                    }
-                })
-                }
-               
-            })
+
+
+    // 정상적인 callback 이 오면 위에서 받아준 텍스트를 바탕으로
+    // 새로운 댓글 element를 추가한다. 
+
+    // delete comment
+    // 삭제 버튼을 누르면 해당 element가 삭제된다.
+    $(document).on('click', '.deleteComment', function(e){
+        console.log("click");
+        console.log($(this).data());
+        var comment_id=$(this).data('id');
+
+        $.ajax({
+            url:'{% url "delete_comment" %}',
+            method:'POST',
+            data:{
+                comment_id:comment_id,
+                csrfmiddlewaretoken:"{{csrf_token}}"
+            },
+            success:function(){
+                console.log("성공!");
+                $('#comment-'+comment_id).remove();
+            },
+            error:function(){
+                console.log("실패!");
+            }
+        })
+    })
+    //삭제 버튼을 찾는다.
+    //삭제 버튼에 click 이벤틀 먹인다.(리스너와 핸들러)
+    // 해당 element가 가지고 있는 유일한 값을 통해
+    // 해당 element를 삭제하고 DB에서 삭제될 수 있도록 서버에 요청
+    //요청이 정상적으로 처리되면 해당 element 삭제 
+
+
+
+    // update comment
+    //기존에 있던 내용을 해당 댓글을 다는 
+    //내용을 바꾸고 실제로 DB에 반영함.
+    $(document).on('click', '.editComment', function(){
+        var contents = $(this).data("contents");
+        var article_id = $(this).data("article-id")
+        console.log(contents);
+        console.log(article_id);
+        //form에서 input을 찾아내는 방식
+        var comment_id = $(this).data("id");
+        $('#commentForm-'+article_id+' .commentInput').val(contents)
+        $('#commentForm-'+article_id+' .formMethod').val("edit")
+        $('#commentForm-'+article_id+' .commentId').val(comment_id)
+    })
+    //edit 버튼을 누르면
+    //해당 댓글이 가지고 있던 내용을
+    //입력창으로 이동시키고
+    //바뀐 내용을 submit하면, 
+    //실제 서버에 반영시키고 
+    //바뀐 내용으로 해당 댓글을 변경
+
+    
 
 
         alert("done");
