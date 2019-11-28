@@ -17,6 +17,7 @@
             <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
             <div class="card-body">
                 <textarea name="contents" class="form-control" rows="5"></textarea>
+                <input placeholder="Insert HashTag"  class="form-control mt-3" type="text" name="hashtag">
                 <div class="input-group mt-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
@@ -60,30 +61,45 @@
             <div class="card-body">
                 <div class="article" style="min-height: 9rem;">
                     <p class="card-text">{{article.contents}}</p>
+                    {% for tag in article.tags.all %}
+                    <span class="badge badge-pill badge-info">#{{tag.tag}}</span>
+                    {% endfor %}
                 </div>
+                <div class ="text-center float-right">
+                    <div class="row">
+                        <span class="text-muted"> created by {{article.user.username}}</span>
+                    </div>
+                </div>
+               
                 <div class="text-center">
-                    <a href="{% url 'edit' article.id %}" class="btn btn-warning text-white"><i class="fas fa-edit"></i></a>
-                    <a href="{% url 'delete' article.id %}" class="btn btn-danger text-white"><i class="fas fa-trash-alt"></i></a>
-                </div>
+                        {% if user in article.user_likes.all %}
+                        <button type="button" class="btn btn-success likes" data-article-id="{{article.id}}"><i class="fas fa-thumbs-up">{{article.user_likes.count}}</i></button>
+                        {% else %}
+                        <button type="button" class="btn btn-secondary likes" data-article-id="{{article.id}}"><i class="fas fa-thumbs-up">{{article.user_likes.count}}</i></button>
+                        {% endif %}
+                        {% if article.user_id == user.id %}
+                        <a href="{% url 'edit' article.id %}" class="btn btn-warning text-white"><i class="fas fa-edit"></i></a>
+                        <a href="{% url 'delete' article.id %}" class="btn btn-danger text-white"><i class="fas fa-trash-alt"></i></a>
+                        {% endif %}
+                    </div>
             </div>
-            <ul class="list-group list-group-flush" id="comment-list-group-{{article.id}}">
-                    
-                    <li class="list-group-item" >
-                        <form action="{% url 'comments' %}" method="POST" class="commentForm" id="commentForm-{{article.id}}">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
-                            <input type="hidden" class="articleId" name="article_id" value="{{article.id}}">
-                            <input type="hidden" class="formMethod" name="form_method" value="create">
-                            <input type="hidden" class="commentId" name="comment_id">
-                            <div class="row">
-                                <div class="col-9">
-                                    <input type="text" class="form-control commentInput" name="contents" class="commentInput">
-                                </div>
-                                <div class="col-3 text-center">
-                                    <input type="submit" class="btn btn-primary" value="쓰기">
-                                </div>
+            <ul class="list-group list-group-flush" id="comment-list-group-{{article.id}}">                
+                <li class="list-group-item" >
+                    <form action="{% url 'comments' %}" method="POST" class="commentForm" id="commentForm-{{article.id}}">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+                        <input type="hidden" class="articleId" name="article_id" value="{{article.id}}">
+                        <input type="hidden" class="formMethod" name="form_method" value="create">
+                        <input type="hidden" class="commentId" name="comment_id">
+                        <div class="row">
+                            <div class="col-9">
+                                <input type="text" class="form-control commentInput" name="contents" class="commentInput">
                             </div>
-                        </form>
-                    </li>
+                            <div class="col-3 text-center">
+                                <input type="submit" class="btn btn-primary" value="쓰기">
+                            </div>
+                        </div>
+                    </form>
+                </li>
 
 
                 <div class="commentList">
@@ -91,16 +107,17 @@
                             {% for comment in article.comments %}
                             <li class="list-group-item" id="comment-{{comment.id}}">
                                 <i class="fas fa-comment-dots"></i> 
-                                <span class="contents">{{comment.contents}}</span>
+                                <span>{{comment.user.username}} - </span><span class="contents">{{comment.contents}}</span>
                                 <span class="float-right">
+                                    {% if comment.user.id == user.id %}
                                     <button data-contents="{{comment.contents}}" data-article-id="{{article.id}}" data-id="{{comment.id}}" class="btn btn-warning text-white editComment"><i class="fas fa-edit"></i></a>
                                     <button data-id="{{comment.id}}" class="btn btn-danger text-white deleteComment"><i class="fas fa-trash-alt"></i></a>
-                                </span> 
+                                    {% endif %}
+                                    </span> 
                             </li>
                             {% endfor %}
                     </ul>
                 </div>
-              
             </ul>
         </div>
     </div>
@@ -119,6 +136,30 @@
     // article 별로 있는 form으로부터 
     
     // submit이라는 이벤트에
+
+        $('.likes').on('click', function(){
+            console.log($(this));
+            var article_id = $(this).data('article-id');
+            var button = $(this);
+            console.log(article_id);
+            $.ajax({
+                url: '{% url "likes" %}',
+                method: 'POST',
+                data: {
+                    article_id: article_id,
+                    csrfmiddlewaretoken: '{{csrf_token}}',
+                },
+                success: function(data){
+                    console.log(data);
+                    button.toggleClass(['btn-secondary', 'btn-success']);
+                },
+                error: function(data){
+                    console.log("실패!");
+                }
+            })
+        })
+
+
         $('.commentForm').on('submit', function(e) {
             e.preventDefault();
             console.log("done");
@@ -151,7 +192,7 @@
                         var comment = `
                         <li class="list-group-item" id="comment-${data.comment_id}">
                             <i class="fas fa-comment-dots"></i> 
-                            <span class="contents">${data.comment}</span>
+                            <span>${data.username} - </span><span class="contents">${data.comment}</span>
                             <span class="float-right">
                                <button data-contents="${data.comment}" data-article-id="${data.article_id}" data-id="${data.comment_id}" class="btn btn-warning text-white editComment"><i class="fas fa-edit"></i></a>
                                <button data-id="${data.comment_id}" class="btn btn-danger text-white deleteComment" id="comment-${data.comment_id}"><i class="fas fa-trash-alt"></i></a>
@@ -162,12 +203,12 @@
                         $('#comment-list-group-'+data.article_id).append(comment);
                     }
 
-
-                    
                     
                 },
                 error:function(data){
-                    console.log("실패!");
+                    if(data.status==401)
+                        location.href='{% url "acounts:login" %}'
+                   
                 }
             })
         })
@@ -191,11 +232,13 @@
                 comment_id:comment_id,
                 csrfmiddlewaretoken:"{{csrf_token}}"
             },
-            success:function(){
+            success:function(data){
                 console.log("성공!");
                 $('#comment-'+comment_id).remove();
             },
-            error:function(){
+            error:function(data){
+                console.log(data);
+                if(data.status==403) location.href="{% url 'acounts:login' %}";
                 console.log("실패!");
             }
         })
@@ -228,11 +271,6 @@
     //바뀐 내용을 submit하면, 
     //실제 서버에 반영시키고 
     //바뀐 내용으로 해당 댓글을 변경
-
-    
-
-
-        alert("done");
     })
 </script>
 {% endblock %}
