@@ -1,0 +1,50 @@
+CREATE TABLE sagyouk(
+period STRING,
+greatbun STRING,
+bun STRING,
+sato STRING,
+safee STRING,
+saqual STRING,
+saenv STRING)
+ROW FORMAT DELIMITED
+    FIELDS TERMINATED BY ','
+    LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE;
+
+CREATE TABLE cars(
+period STRING,
+gu STRING,
+tot_3 STRING,
+tot_4 STRING,
+tot_5 STRING,
+tot_6 STRING,
+seung_7 STRING,
+seung_8 STRING,
+seung_9 STRING,
+seung_10 STRING,
+seung_11 STRING,
+seung_12 STRING,
+seung_13 STRING,
+seung_14 STRING,
+seung_15 STRING,
+seung_16 STRING,
+seung_17 STRING,
+seung_18 STRING,
+seung_19 STRING,
+seung_20 STRING,
+seung_21 STRING,
+seung_22 STRING,
+seung_23 STRING,
+seung_24 STRING,
+seung_25 STRING)
+ROW FORMAT DELIMITED
+    FIELDS TERMINATED BY ','
+    LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE;;
+
+
+LOAD DATA LOCAL INPATH '/root/data/data11.csv'
+OVERWRITE INTO TABLE sagyouk;
+
+LOAD DATA LOCAL INPATH '/root/data/data22.csv'
+OVERWRITE INTO TABLE cars;
