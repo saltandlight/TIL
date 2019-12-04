@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import User
 
 from imagekit.models import ImageSpecField, ProcessedImageField
 from imagekit.processors import ResizeToFill, Thumbnail
@@ -9,6 +11,10 @@ class Article(models.Model):
     contents = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE)
+    user_likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name = "article_likes")
+    # 뭐랑 관계지을지 넣어줌 
+
     # 원본 이미지를 저장해두고
     # image = models.ImageField(blank=True)
     
@@ -33,7 +39,8 @@ class Article(models.Model):
         return Comment.objects.filter(article_id=self.id)
     def article_images(self):
         return ArticleImages.objects.filter(article_id=self.id)
-
+    def is_permitted(self, target_id):
+        return self.user_id == target_id
 
 class ArticleImages(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
@@ -50,6 +57,12 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+class HashTag(models.Model):
+    tag = models.CharField(max_length=16, unique = True)
+    article = models.ManyToManyField(Article, related_name="tags")
+
 
 class Board(models.Model):
     contents = models.CharField(max_length=16)
