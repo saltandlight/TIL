@@ -92,7 +92,7 @@ SELECT JOB FROM EMP e2 WHERE ENAME = 'JONES')
 ```
 
 # 7. 집합 연산
-
+- **중요한 점: 컬럼 개수와 타입이 일치해야 함!**
 ## 7-1 테이블 덧셈과 뺄셈
 
 - 테이블 덧셈----UNION
