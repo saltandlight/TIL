@@ -1,0 +1,11 @@
+# DATE 비교
+- 날짜 비교는 TO_CHAR 함수나 TO_DATE함수를 이용해서 하기
+- TO_CHAR를 이용하는 경우
+```SQL
+SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') FROM DUAL;
+```
+
+- TO_DATE를 이용하는 경우
+```SQL
+SELECT TO_DATE('2020-07-21 00:00:59', 'YYYY-MM-DD HH24:MI:SS') FROM DUAL;
+```
