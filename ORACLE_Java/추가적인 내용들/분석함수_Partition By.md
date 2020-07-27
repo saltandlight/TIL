@@ -16,3 +16,6 @@
 - 실행 순서
   `FROM-WHERE-GROUP BY-HAVING-SELECT-ORDER BY-OVER`
 - 가장 마지막에 실행됨
+
+
+- 참고: https://myjamong.tistory.com/188
